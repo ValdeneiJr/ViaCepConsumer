@@ -2,6 +2,7 @@ package edu.uea.service;
 
 import com.google.gson.Gson;
 import edu.uea.dtos.EnderecoDto;
+import edu.uea.exceptions.CepNotFoundException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,12 +21,24 @@ public class ClientHtpp {
         this.gson = gson;
     }
 
-    public EnderecoDto consulta(String cep) throws IOException, InterruptedException {
+    public EnderecoDto consulta(String cep) throws CepNotFoundException {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl + cep +"/json/")).build();
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        EnderecoDto enderecoDto = gson.fromJson(response.body(), EnderecoDto.class);
+        try{
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                EnderecoDto enderecoDto = gson.fromJson(response.body(), EnderecoDto.class);
+                if(enderecoDto.erro() != true)
+                    return enderecoDto;
+                else
+                    throw new CepNotFoundException("CEP não encontrado");
+            }
+        }
+        catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
 
-        return enderecoDto;
+        return null;
     }
 }

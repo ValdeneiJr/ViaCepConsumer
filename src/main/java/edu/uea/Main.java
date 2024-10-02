@@ -2,15 +2,14 @@ package edu.uea;
 
 import com.google.gson.Gson;
 import edu.uea.dtos.EnderecoDto;
+import edu.uea.exceptions.CepInvalidoException;
+import edu.uea.exceptions.CepNotFoundException;
 import edu.uea.models.Endereco;
 import edu.uea.service.ClientHtpp;
 import edu.uea.service.PersistenceService;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.Scanner;
 
 public class Main {
     private static String apiUrl = "https://viacep.com.br/ws/";
@@ -19,26 +18,67 @@ public class Main {
     private static Gson gson = new Gson();
     private static PersistenceService persistenceService = new PersistenceService(gson, dirPath);
     private static ClientHtpp client = new ClientHtpp(apiUrl, gson);
+    private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
         EnderecoDto enderecoDto;
         Endereco endereco;
+        String cep;
 
-        String cep = "69086669";
+        System.out.println("Bem vindo ao buscador de cep");
 
-        if (persistenceService.existeCep(cep)){
-            enderecoDto = persistenceService.getEndereco(cep);
+        while (true){
+            try{
+                cep = obterCep();
+            }
+            catch (CepInvalidoException e){
+                System.out.println(e.getMessage());
+                System.out.println();
+                continue;
+            }
+
+            if(cep == null) break;
+
+            System.out.println();
+
+            if (persistenceService.existeCep(cep)){
+                enderecoDto = persistenceService.getEndereco(cep);
+                endereco = new Endereco(enderecoDto);
+
+                System.out.println("Endereço já salvo localmente");
+                System.out.println(endereco);
+                System.out.println();
+
+                continue;
+            }
+
+            try{
+                enderecoDto = client.consulta(cep);
+            }
+            catch (CepNotFoundException e){
+                System.out.println(e.getMessage());
+                continue;
+            }
+
             endereco = new Endereco(enderecoDto);
-
             System.out.println(endereco);
+            if (persistenceService.persistCep(enderecoDto)) System.out.println("Salvo localmente em: " + cep + ".json");
+            else System.out.println("Não foi possivel salvar seu arquivo");
         }
+    }
 
-        enderecoDto = client.consulta(cep);
-        endereco = new Endereco(enderecoDto);
-        System.out.println(endereco);
-        if (persistenceService.persistCep(enderecoDto)) System.out.println("Arquivo: " + enderecoDto.cep()
-                .replace("-", "") + ".json");
-        else System.out.println("Não foi possivel salvar seu arquivo");
+    public static String obterCep() throws CepInvalidoException {
+        System.out.println("Insira o CEP a buscar ou SAIR(sair do buscador)");
+        String cep = scanner.nextLine();
+
+        if(cep.toLowerCase().equals("sair")) return null;
+
+        if (cep.contains("-")) cep = cep.replace("-", "");
+
+        if (cep.isEmpty() || !cep.matches("[0-9]{8}"))
+            throw new CepInvalidoException("Cep invalido, se atente ao formato padrão para cep!");
+
+        return cep;
     }
 }
