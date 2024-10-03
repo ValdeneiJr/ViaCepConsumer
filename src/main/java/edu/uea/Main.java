@@ -40,8 +40,6 @@ public class Main {
 
             if(cep == null) break;
 
-            System.out.println();
-
             if (persistenceService.existeCep(cep)){
                 enderecoDto = persistenceService.getEndereco(cep);
                 endereco = new Endereco(enderecoDto);
@@ -58,13 +56,15 @@ public class Main {
             }
             catch (CepNotFoundException e){
                 System.out.println(e.getMessage());
+                System.out.println();
                 continue;
             }
 
             endereco = new Endereco(enderecoDto);
             System.out.println(endereco);
             if (persistenceService.persistCep(enderecoDto)) System.out.println("Salvo localmente em: " + cep + ".json");
-            else System.out.println("Não foi possivel salvar seu arquivo");
+
+            System.out.println();
         }
     }
 

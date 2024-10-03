@@ -2,9 +2,6 @@ package edu.uea.service;
 
 import com.google.gson.Gson;
 import edu.uea.dtos.EnderecoDto;
-import edu.uea.models.Endereco;
-
-import javax.imageio.IIOException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,8 +30,10 @@ public class PersistenceService {
             return true;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            System.out.println(e.getMessage());
         }
+
+        return false;
     }
 
     public EnderecoDto getEndereco(String cep) {
@@ -46,6 +45,7 @@ public class PersistenceService {
         }
         catch (IOException e){
             e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         return null;
