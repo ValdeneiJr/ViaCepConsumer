@@ -7,8 +7,6 @@ import edu.uea.exceptions.CepNotFoundException;
 import edu.uea.models.Endereco;
 import edu.uea.service.ClientHtpp;
 import edu.uea.service.PersistenceService;
-
-import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
