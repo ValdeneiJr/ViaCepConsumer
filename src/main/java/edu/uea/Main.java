@@ -20,7 +20,7 @@ public class Main {
     private static ClientHtpp client = new ClientHtpp(apiUrl, gson);
     private static Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
 
         EnderecoDto enderecoDto;
         Endereco endereco;
@@ -72,7 +72,7 @@ public class Main {
         System.out.println("Insira o CEP a buscar ou SAIR(sair do buscador)");
         String cep = scanner.nextLine();
 
-        if(cep.toLowerCase().equals("sair")) return null;
+        if(cep.equalsIgnoreCase("sair")) return null;
 
         if (cep.contains("-")) cep = cep.replace("-", "");
 
