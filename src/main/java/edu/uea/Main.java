@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class Main {
     private static String apiUrl = "https://viacep.com.br/ws/";
-    private static String dirPath = "/home/junior/Área de trabalho/dados_trab_palheta/";
+    private static String dirPath = "C:\\Users\\tahad\\Área de Trabalho\\dados_trab_palheta\\";
 
     private static Gson gson = new Gson();
     private static PersistenceService persistenceService = new PersistenceService(gson, dirPath);
@@ -39,12 +39,17 @@ public class Main {
             if(cep == null) break;
 
             if (persistenceService.existeCep(cep)){
-                enderecoDto = persistenceService.getEndereco(cep);
-                endereco = new Endereco(enderecoDto);
+                endereco = persistenceService.getEndereco(cep);
 
-                System.out.println("Endereço já salvo localmente");
-                System.out.println(endereco);
-                System.out.println();
+                if(endereco == null){
+                    System.out.println("O endereço esta armazenado localmente mas não foi possivel" +
+                            "recupera-lo no momento");
+                }
+                else{
+                    System.out.println("Endereço já salvo localmente");
+                    System.out.println(endereco);
+                    System.out.println();
+                }
 
                 continue;
             }
@@ -58,10 +63,15 @@ public class Main {
                 continue;
             }
 
+            if (enderecoDto == null){
+                System.out.println("Não foi possivel obter o CEP informado, problemas na API");
+                continue;
+            }
+
             endereco = new Endereco(enderecoDto);
             System.out.println(endereco);
-            if (persistenceService.persistCep(enderecoDto)) System.out.println("Salvo localmente em: " + cep + ".json");
-
+            if (persistenceService.persistCep(endereco))
+                System.out.println("Salvo localmente em: " + cep + ".json");
             System.out.println();
         }
     }
@@ -72,10 +82,12 @@ public class Main {
 
         if(cep.equalsIgnoreCase("sair")) return null;
 
+        if (cep.isEmpty() || !cep.matches("\\d{8}|\\d{5}-\\d{3}"))
+            throw new CepInvalidoException("Cep invalido, se atente ao formato padrão para cep!");
+
         if (cep.contains("-")) cep = cep.replace("-", "");
 
-        if (cep.isEmpty() || !cep.matches("[0-9]{8}"))
-            throw new CepInvalidoException("Cep invalido, se atente ao formato padrão para cep!");
+        System.out.println();
 
         return cep;
     }

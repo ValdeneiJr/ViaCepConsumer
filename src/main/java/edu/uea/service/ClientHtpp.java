@@ -28,14 +28,13 @@ public class ClientHtpp {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if(response.statusCode() == 200) {
                 EnderecoDto enderecoDto = gson.fromJson(response.body(), EnderecoDto.class);
-                if(enderecoDto.erro() != true)
+                if(!enderecoDto.erro())
                     return enderecoDto;
                 else
                     throw new CepNotFoundException("CEP não encontrado");
             }
         }
         catch (InterruptedException | IOException e) {
-            e.printStackTrace();
             System.out.println(e.getMessage());
         }
 

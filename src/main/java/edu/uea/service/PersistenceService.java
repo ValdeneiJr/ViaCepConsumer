@@ -1,7 +1,8 @@
 package edu.uea.service;
 
 import com.google.gson.Gson;
-import edu.uea.dtos.EnderecoDto;
+import edu.uea.models.Endereco;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,9 +23,9 @@ public class PersistenceService {
         return Files.exists(path);
     }
 
-    public boolean persistCep(EnderecoDto enderecoDto) {
-        Path path = Paths.get(dirPath + enderecoDto.cep().replace("-", "") + ".json");
-        String json = gson.toJson(enderecoDto);
+    public boolean persistCep(Endereco endereco) {
+        Path path = Paths.get(dirPath + endereco.getCep().replace("-", "") + ".json");
+        String json = gson.toJson(endereco);
         try{
             Files.write(path, json.getBytes());
             return true;
@@ -36,15 +37,14 @@ public class PersistenceService {
         return false;
     }
 
-    public EnderecoDto getEndereco(String cep) {
+    public Endereco getEndereco(String cep) {
         Path path = Paths.get(dirPath + cep + ".json");
         try{
             String json = new String(Files.readAllBytes(path));
-            EnderecoDto enderecoDto = gson.fromJson(json, EnderecoDto.class);
-            return enderecoDto;
+            Endereco endereco = gson.fromJson(json, Endereco.class);
+            return endereco;
         }
         catch (IOException e){
-            e.printStackTrace();
             System.out.println(e.getMessage());
         }
 
